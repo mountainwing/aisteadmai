@@ -17,10 +17,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const login = (username: string, password: string): boolean => {
-    const userKey = username.toLowerCase() as keyof typeof USERS;
-    const userData = USERS[userKey];
+    // Find user by matching username and password
+    const userData = Object.values(USERS).find(user => 
+      user.username === username && user.password === password
+    );
     
-    if (userData && userData.password === password) {
+    if (userData) {
       const loggedInUser = {
         username: userData.username,
         role: userData.role
