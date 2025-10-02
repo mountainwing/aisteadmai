@@ -1,5 +1,5 @@
 // Vercel serverless function for reasonheader API
-import { connectDB } from '../config/database.js';
+import { MongoClient } from 'mongodb';
 import cors from 'cors';
 
 // CORS configuration
@@ -19,6 +19,20 @@ function runCors(req, res) {
       return resolve(result);
     });
   });
+}
+
+// Database connection
+async function connectDB() {
+  const mongoUri = process.env.MONGODB_URI;
+  const databaseName = process.env.MONGODB_DB_NAME || '_ethan_boyfriend_proposal';
+
+  if (!mongoUri) {
+    throw new Error('MONGODB_URI is not defined in environment variables');
+  }
+
+  const client = new MongoClient(mongoUri);
+  await client.connect();
+  return client.db(databaseName);
 }
 
 export default async function handler(req, res) {

@@ -124,10 +124,14 @@ Currently hardcoded in the app:
    - Ensure IP whitelist includes 0.0.0.0/0
    - Verify username/password
 
-2. **API Routes Not Working:**
-   - Check Vercel function logs
-   - Ensure environment variables are set
+2. **API Routes Not Working (404 errors):**
+   - Check Vercel function logs in your Vercel dashboard
+   - Ensure environment variables are set correctly:
+     - `MONGODB_URI` (your full MongoDB connection string)
+     - `MONGODB_DB_NAME` (set to `_ethan_boyfriend_proposal`)
    - Verify the `vercel.json` configuration
+   - Make sure all API files are in the `/api` directory
+   - Check that your MongoDB Atlas IP whitelist includes `0.0.0.0/0` for all IPs
 
 3. **Build Errors:**
    - Check the build logs in Vercel
