@@ -47,11 +47,10 @@ const ReasonsSection = ({ isEditMode = false }: ReasonsSectionProps) => {
   const [headerUpdateError, setHeaderUpdateError] = useState<string | null>(null);
 
   const handleAdd = () => {
-    if (newTitle.trim() && newDescription.trim() && user) {
+    if (newTitle.trim() && newDescription.trim()) {
       createReason({
         title: newTitle,
-        description: newDescription,
-        createdBy: user.role
+        description: newDescription
       });
       setNewTitle("");
       setNewDescription("");
@@ -60,12 +59,9 @@ const ReasonsSection = ({ isEditMode = false }: ReasonsSectionProps) => {
   };
 
   const handleRemove = (id: string) => {
-    if (user) {
-      deleteReason({
-        id,
-        deletedBy: user.role
-      });
-    }
+    deleteReason({
+      id
+    });
   };
 
   const handleEdit = (reason: { _id: string; title: string; description: string }) => {
@@ -75,12 +71,11 @@ const ReasonsSection = ({ isEditMode = false }: ReasonsSectionProps) => {
   };
 
   const handleSaveEdit = () => {
-    if (editingId && editTitle.trim() && editDescription.trim() && user) {
+    if (editingId && editTitle.trim() && editDescription.trim()) {
       updateReason({
         id: editingId,
         title: editTitle,
-        description: editDescription,
-        updatedBy: user.role
+        description: editDescription
       });
       setEditingId(null);
       setEditTitle("");
@@ -120,16 +115,10 @@ const ReasonsSection = ({ isEditMode = false }: ReasonsSectionProps) => {
       return;
     }
 
-    if (!user) {
-      setHeaderUpdateError('User authentication required');
-      return;
-    }
-
     setHeaderUpdateError(null);
     const success = await updateReasonHeader({
       title: editHeaderTitle.trim() || undefined,
-      subtitle: editHeaderSubtitle.trim() || undefined,
-      updatedBy: user.role
+      subtitle: editHeaderSubtitle.trim() || undefined
     });
 
     if (success) {

@@ -53,10 +53,10 @@ export default async function handler(req, res) {
       res.json(media);
       
     } else if (req.method === 'POST') {
-      // For now, return a message about file upload limitations on Vercel
-      res.status(501).json({ 
-        error: 'File uploads not implemented for Vercel deployment. Consider using Cloudinary or AWS S3 for media storage.',
-        message: 'Media upload feature requires external storage service in production.'
+      // For now, return a user-friendly message about file upload limitations on Vercel
+      res.status(400).json({ 
+        error: 'File uploads are temporarily unavailable in the deployed version. This feature works in development mode.',
+        suggestion: 'You can still view and manage existing media items.'
       });
       
     } else if (req.method === 'DELETE') {

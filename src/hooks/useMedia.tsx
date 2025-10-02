@@ -1,5 +1,4 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useAuth } from './useAuth';
 
 interface MediaItem {
   _id: string;
@@ -30,7 +29,6 @@ export const useMedia = (): UseMediaReturn => {
   const [mediaItems, setMediaItems] = useState<MediaItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { user } = useAuth();
 
   const fetchMedia = useCallback(async () => {
     try {
@@ -54,29 +52,30 @@ export const useMedia = (): UseMediaReturn => {
   }, []);
 
   const uploadMedia = async (file: File, caption?: string): Promise<boolean> => {
-    if (!user) {
-      setError('You must be logged in to upload media');
-      return false;
-    }
-
     try {
       setError(null);
       
       const formData = new FormData();
       formData.append('file', file);
-      formData.append('uploadedBy', user.username);
+      formData.append('uploadedBy', 'user');
       if (caption) {
         formData.append('caption', caption);
       }
 
-      const response = await fetch(`${API_BASE_URL}/media/upload`, {
+      const response = await fetch(`${API_BASE_URL}/media`, {
         method: 'POST',
         body: formData,
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || `Failed to upload media: ${response.statusText}`);
+        let errorMessage = `Failed to upload media: ${response.statusText}`;
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.error || errorData.suggestion || errorMessage;
+        } catch (parseError) {
+          // If response isn't JSON, use the status text
+        }
+        throw new Error(errorMessage);
       }
 
       const result = await response.json();
@@ -92,20 +91,15 @@ export const useMedia = (): UseMediaReturn => {
   };
 
   const deleteMedia = async (id: string): Promise<boolean> => {
-    if (!user) {
-      setError('You must be logged in to delete media');
-      return false;
-    }
-
     try {
       setError(null);
 
-      const response = await fetch(`${API_BASE_URL}/media/${id}`, {
+      const response = await fetch(`${API_BASE_URL}/media`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ username: user.username }),
+        body: JSON.stringify({ id }),
       });
 
       if (!response.ok) {
@@ -124,11 +118,6 @@ export const useMedia = (): UseMediaReturn => {
   };
 
   const updateCaption = async (id: string, caption: string): Promise<boolean> => {
-    if (!user) {
-      setError('You must be logged in to update captions');
-      return false;
-    }
-
     try {
       setError(null);
 
@@ -137,7 +126,7 @@ export const useMedia = (): UseMediaReturn => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ caption, username: user.username }),
+        body: JSON.stringify({ caption, username: 'user' }),
       });
 
       if (!response.ok) {
