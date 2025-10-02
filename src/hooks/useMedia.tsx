@@ -41,7 +41,22 @@ export const useMedia = (): UseMediaReturn => {
       }
       
       const data = await response.json();
-      setMediaItems(data);
+      console.log('Raw media data from API:', data);
+      // Ensure data is an array and has proper structure
+      const validatedData = Array.isArray(data) ? data.filter(item => 
+        item && 
+        typeof item === 'object' && 
+        item._id && 
+        item.filename
+      ).map(item => ({
+        ...item,
+        type: item.type || (item.mimetype?.startsWith('video/') ? 'video' : 'image'),
+        url: item.url || '/placeholder.svg',
+        caption: item.caption || '',
+        uploadedBy: item.uploadedBy || 'user'
+      })) : [];
+      console.log('Validated media data:', validatedData);
+      setMediaItems(validatedData);
     } catch (err) {
       console.error('Error fetching media:', err);
       setError(err instanceof Error ? err.message : 'Failed to fetch media');

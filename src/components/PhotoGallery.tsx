@@ -189,7 +189,7 @@ const PhotoGallery = ({ isEditMode = false }: PhotoGalleryProps) => {
               className="flex gap-4 overflow-x-auto pb-4 px-8 scroll-smooth"
               style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
             >
-              {mediaItems.map((item, index) => (
+              {mediaItems && Array.isArray(mediaItems) && mediaItems.filter(item => item && item._id).map((item, index) => (
                 <Card 
                   key={item._id} 
                   className="group relative flex-none w-64 h-80 overflow-hidden animate-fade-in hover:shadow-[0_20px_40px_-15px_hsl(340_75%_55%/0.3)] transition-all duration-300"
@@ -198,7 +198,7 @@ const PhotoGallery = ({ isEditMode = false }: PhotoGalleryProps) => {
                   <CardContent className="p-0 h-full relative">
                     {/* Media Content */}
                     <div className="h-4/5 relative overflow-hidden">
-                      {item.type === 'image' ? (
+                      {item && item.type === 'image' ? (
                         <img 
                           src={`${process.env.NODE_ENV === 'production' ? '' : 'http://localhost:3001'}${item.url}`}
                           alt={item.caption || "Memory"} 
