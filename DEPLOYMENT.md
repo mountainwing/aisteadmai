@@ -125,13 +125,15 @@ Currently hardcoded in the app:
    - Verify username/password
 
 2. **API Routes Not Working (404 errors):**
-   - Check Vercel function logs in your Vercel dashboard
-   - Ensure environment variables are set correctly:
+   - **First, test the simple API**: Try accessing `/api/test` on your deployed site to see if basic API routing works
+   - **Check Vercel function logs** in your Vercel dashboard under the "Functions" tab
+   - **Ensure environment variables are set correctly:**
      - `MONGODB_URI` (your full MongoDB connection string)
      - `MONGODB_DB_NAME` (set to `_ethan_boyfriend_proposal`)
-   - Verify the `vercel.json` configuration
-   - Make sure all API files are in the `/api` directory
-   - Check that your MongoDB Atlas IP whitelist includes `0.0.0.0/0` for all IPs
+   - **Verify Node.js version**: Make sure your package.json includes `"engines": { "node": ">=18.0.0" }`
+   - **Check deployment logs**: Look for build errors in Vercel deployment logs
+   - **MongoDB Atlas setup**: Ensure IP whitelist includes `0.0.0.0/0` for all IPs
+   - **Test individual endpoints**: Try `/api/health`, `/api/hero`, `/api/reasons` separately
 
 3. **Build Errors:**
    - Check the build logs in Vercel
