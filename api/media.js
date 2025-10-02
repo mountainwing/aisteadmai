@@ -1,5 +1,5 @@
-// Vercel serverless function for media API
-import { MongoClient, ObjectId } from 'mongodb';
+// Vercel serverless function for media API with Azure Blob Storage
+import { BlobServiceClient } from '@azure/storage-blob';
 import cors from 'cors';
 import { randomUUID } from 'crypto';
 
@@ -21,18 +21,29 @@ function runCors(req, res) {
   });
 }
 
-// Database connection
-async function connectDB() {
-  const mongoUri = process.env.MONGODB_URI;
-  const databaseName = process.env.MONGODB_DB_NAME || '_ethan_boyfriend_proposal';
-
-  if (!mongoUri) {
-    throw new Error('MONGODB_URI is not defined in environment variables');
+// Azure Blob Storage connection
+function getBlobServiceClient() {
+  const connectionString = process.env.AZURE_STORAGE_CONNECTION_STRING;
+  
+  if (!connectionString) {
+    throw new Error('AZURE_STORAGE_CONNECTION_STRING is not defined in environment variables');
   }
 
-  const client = new MongoClient(mongoUri);
-  await client.connect();
-  return client.db(databaseName);
+  return BlobServiceClient.fromConnectionString(connectionString);
+}
+
+// Helper function to get container client
+async function getContainerClient() {
+  const blobServiceClient = getBlobServiceClient();
+  const containerName = process.env.AZURE_STORAGE_CONTAINER_NAME || 'love-ly-media';
+  const containerClient = blobServiceClient.getContainerClient(containerName);
+  
+  // Ensure container exists
+  await containerClient.createIfNotExists({
+    access: 'blob' // Allow public read access to blobs
+  });
+  
+  return containerClient;
 }
 
 export default async function handler(req, res) {
@@ -43,77 +54,91 @@ export default async function handler(req, res) {
     return;
   }
 
-  let db;
-  
   try {
-    db = await connectDB();
-    const collection = db.collection('media');
+    const containerClient = await getContainerClient();
     
     if (req.method === 'GET') {
-      let media = await collection.find({}).sort({ uploadedAt: -1 }).toArray();
+      // List all blobs in the container
+      const media = [];
       
-      // If no media items exist, seed with existing files
-      if (media.length === 0) {
-        const seedMedia = [
-          {
-            _id: new ObjectId(),
-            filename: '1d134914-c7aa-4a23-a8f2-9622f5a2279c-1759398070035.jpg',
-            originalName: 'beautiful-memory.jpg',
-            mimetype: 'image/jpeg',
-            size: 1024 * 200,
-            type: 'image',
-            url: '/api/uploads/1d134914-c7aa-4a23-a8f2-9622f5a2279c-1759398070035.jpg',
-            uploadedBy: 'user',
-            caption: 'A beautiful memory of us together',
-            uploadedAt: new Date('2024-01-15T10:30:00Z')
-          },
-          {
-            _id: new ObjectId(),
-            filename: '1fad54ef-6db7-4cc7-91f2-2c3042d79ea7-1759398124124.mp4',
-            originalName: 'our-favorite-video.mp4',
-            mimetype: 'video/mp4',
-            size: 1024 * 1024 * 5,
-            type: 'video',
-            url: '/api/uploads/1fad54ef-6db7-4cc7-91f2-2c3042d79ea7-1759398124124.mp4',
-            uploadedBy: 'user',
-            caption: 'Our favorite video together',
-            uploadedAt: new Date('2024-01-20T14:20:00Z')
-          }
-        ];
+      for await (const blob of containerClient.listBlobsFlat({ includeMetadata: true })) {
+        const blobClient = containerClient.getBlobClient(blob.name);
+        const blobUrl = blobClient.url;
         
-        await collection.insertMany(seedMedia);
-        media = seedMedia;
+        // Parse metadata or use defaults
+        const metadata = blob.metadata || {};
+        
+        media.push({
+          _id: blob.name.split('.')[0], // Use filename without extension as ID
+          filename: blob.name,
+          originalName: metadata.originalname || blob.name,
+          mimetype: blob.properties.contentType || 'application/octet-stream',
+          size: blob.properties.contentLength || 0,
+          type: blob.properties.contentType?.startsWith('video/') ? 'video' : 'image',
+          url: blobUrl,
+          uploadedBy: metadata.uploadedby || 'user',
+          caption: metadata.caption || '',
+          uploadedAt: blob.properties.lastModified || new Date()
+        });
       }
+      
+      // Sort by upload date (newest first)
+      media.sort((a, b) => new Date(b.uploadedAt) - new Date(a.uploadedAt));
       
       res.json(media);
       
     } else if (req.method === 'POST') {
-      // For now, let's create a simple mock upload that works
-      // In production, you'd typically use a service like Cloudinary or AWS S3
-      const { fileName, fileType, caption, uploadedBy } = req.body;
+      // Handle file upload to Azure Blob Storage
+      // Note: In Vercel serverless functions, we need to handle multipart data differently
       
-      if (!fileName) {
-        return res.status(400).json({ error: 'File name is required' });
+      if (!req.body || typeof req.body !== 'object') {
+        return res.status(400).json({ error: 'Invalid request body' });
       }
 
-      // Create a mock media document (for demo purposes)
-      const mediaDoc = {
-        _id: new ObjectId(),
-        filename: `${randomUUID()}-${Date.now()}.${fileName.split('.').pop() || 'jpg'}`,
-        originalName: fileName || 'uploaded-file',
-        mimetype: fileType || 'image/jpeg',
-        size: 1024 * 100, // Mock size
+      const { fileData, fileName, fileType, caption, uploadedBy } = req.body;
+      
+      if (!fileData || !fileName) {
+        return res.status(400).json({ error: 'File data and name are required' });
+      }
+
+      // Generate unique filename
+      const extension = fileName.split('.').pop() || 'jpg';
+      const uniqueFileName = `${randomUUID()}-${Date.now()}.${extension}`;
+      
+      // Convert base64 to buffer
+      const buffer = Buffer.from(fileData, 'base64');
+      
+      // Upload to Azure Blob Storage
+      const blobClient = containerClient.getBlockBlobClient(uniqueFileName);
+      
+      const metadata = {
+        originalname: fileName,
+        uploadedby: uploadedBy || 'user',
+        caption: caption || '',
+        uploadedat: new Date().toISOString()
+      };
+      
+      await blobClient.upload(buffer, buffer.length, {
+        blobHTTPHeaders: {
+          blobContentType: fileType || 'application/octet-stream'
+        },
+        metadata
+      });
+      
+      // Return the created media item
+      const createdMedia = {
+        _id: uniqueFileName.split('.')[0],
+        filename: uniqueFileName,
+        originalName: fileName,
+        mimetype: fileType || 'application/octet-stream',
+        size: buffer.length,
         type: fileType?.startsWith('video/') ? 'video' : 'image',
-        url: '/placeholder.svg', // Use placeholder for now
+        url: blobClient.url,
         uploadedBy: uploadedBy || 'user',
         caption: caption || '',
         uploadedAt: new Date()
       };
-
-      const result = await collection.insertOne(mediaDoc);
       
-      // Return the created media item
-      const createdMedia = await collection.findOne({ _id: result.insertedId });
       res.json(createdMedia);
       
     } else if (req.method === 'DELETE') {
@@ -123,11 +148,22 @@ export default async function handler(req, res) {
         return res.status(400).json({ error: 'ID is required' });
       }
       
-      const result = await collection.deleteOne({ _id: new ObjectId(id) });
+      // Find blob by ID (filename prefix)
+      let blobToDelete = null;
+      for await (const blob of containerClient.listBlobsFlat()) {
+        if (blob.name.startsWith(id)) {
+          blobToDelete = blob.name;
+          break;
+        }
+      }
       
-      if (result.deletedCount === 0) {
+      if (!blobToDelete) {
         return res.status(404).json({ error: 'Media not found' });
       }
+      
+      // Delete the blob
+      const blobClient = containerClient.getBlobClient(blobToDelete);
+      await blobClient.delete();
       
       res.json({ message: 'Media deleted successfully' });
       
@@ -138,21 +174,42 @@ export default async function handler(req, res) {
         return res.status(400).json({ error: 'ID is required' });
       }
       
-      const result = await collection.updateOne(
-        { _id: new ObjectId(id) },
-        { 
-          $set: { 
-            caption: caption || '',
-            updatedAt: new Date()
-          }
+      // Find blob by ID (filename prefix)
+      let blobToUpdate = null;
+      for await (const blob of containerClient.listBlobsFlat({ includeMetadata: true })) {
+        if (blob.name.startsWith(id)) {
+          blobToUpdate = blob;
+          break;
         }
-      );
+      }
       
-      if (result.matchedCount === 0) {
+      if (!blobToUpdate) {
         return res.status(404).json({ error: 'Media not found' });
       }
       
-      const updatedMedia = await collection.findOne({ _id: new ObjectId(id) });
+      // Update blob metadata
+      const blobClient = containerClient.getBlobClient(blobToUpdate.name);
+      const metadata = blobToUpdate.metadata || {};
+      metadata.caption = caption || '';
+      metadata.updatedat = new Date().toISOString();
+      
+      await blobClient.setMetadata(metadata);
+      
+      // Return updated media item
+      const properties = await blobClient.getProperties();
+      const updatedMedia = {
+        _id: blobToUpdate.name.split('.')[0],
+        filename: blobToUpdate.name,
+        originalName: metadata.originalname || blobToUpdate.name,
+        mimetype: properties.contentType || 'application/octet-stream',
+        size: properties.contentLength || 0,
+        type: properties.contentType?.startsWith('video/') ? 'video' : 'image',
+        url: blobClient.url,
+        uploadedBy: metadata.uploadedby || 'user',
+        caption: metadata.caption || '',
+        uploadedAt: properties.lastModified || new Date()
+      };
+      
       res.json(updatedMedia);
       
     } else {

@@ -6,15 +6,21 @@ This guide will help you deploy your Love Landing Page to Vercel with full-stack
 
 ### Prerequisites
 
-1. **MongoDB Atlas Account** (recommended for production)
+1. **MongoDB Atlas Account** (for text content storage)
    - Sign up at [MongoDB Atlas](https://cloud.mongodb.com/)
    - Create a new cluster
    - Get your connection string
 
-2. **GitHub Account**
+2. **Azure Storage Account** (for media files)
+   - Sign up at [Azure Portal](https://portal.azure.com)
+   - Create a Storage Account and Blob Container
+   - Get your connection string
+   - **See AZURE_SETUP.md for detailed instructions**
+
+3. **GitHub Account**
    - Your code needs to be in a GitHub repository
 
-3. **Vercel Account**
+4. **Vercel Account**
    - Sign up at [vercel.com](https://vercel.com)
    - Connect your GitHub account
 
@@ -67,6 +73,8 @@ This guide will help you deploy your Love Landing Page to Vercel with full-stack
      ```
      MONGODB_URI = your_mongodb_connection_string
      MONGODB_DB_NAME = _ethan_boyfriend_proposal
+     AZURE_STORAGE_CONNECTION_STRING = your_azure_storage_connection_string
+     AZURE_STORAGE_CONTAINER_NAME = love-ly-media
      ```
 
 3. **Deploy:**
@@ -144,9 +152,13 @@ Currently hardcoded in the app:
 ### Environment Variables Reference
 
 ```bash
-# Required for production
+# Required for production - MongoDB (text content)
 MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/?retryWrites=true&w=majority
 MONGODB_DB_NAME=_ethan_boyfriend_proposal
+
+# Required for production - Azure Blob Storage (media files)
+AZURE_STORAGE_CONNECTION_STRING=DefaultEndpointsProtocol=https;AccountName=your_storage_account;AccountKey=your_key;EndpointSuffix=core.windows.net
+AZURE_STORAGE_CONTAINER_NAME=love-ly-media
 
 # Optional
 API_PORT=3001  # Not used in Vercel, but kept for local development

@@ -200,17 +200,24 @@ const PhotoGallery = ({ isEditMode = false }: PhotoGalleryProps) => {
                     <div className="h-4/5 relative overflow-hidden">
                       {item && item.type === 'image' ? (
                         <img 
-                          src={`${process.env.NODE_ENV === 'production' ? '' : 'http://localhost:3001'}${item.url}`}
+                          src={item.url}
                           alt={item.caption || "Memory"} 
                           className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+                          onError={(e) => {
+                            // Fallback to placeholder if image fails to load
+                            (e.target as HTMLImageElement).src = '/placeholder.svg';
+                          }}
                         />
                       ) : (
                         <div className="relative w-full h-full">
                           <video 
-                            src={`${process.env.NODE_ENV === 'production' ? '' : 'http://localhost:3001'}${item.url}`}
+                            src={item.url}
                             className="w-full h-full object-cover"
                             controls
                             preload="metadata"
+                            onError={(e) => {
+                              console.warn('Failed to load video:', item.url);
+                            }}
                           />
                           <div className="absolute inset-0 flex items-center justify-center pointer-events-none bg-black/20 group-hover:bg-black/0 transition-colors">
                             <Play className="w-12 h-12 text-white opacity-80" />

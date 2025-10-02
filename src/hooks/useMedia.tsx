@@ -41,7 +41,6 @@ export const useMedia = (): UseMediaReturn => {
       }
       
       const data = await response.json();
-      console.log('Raw media data from API:', data);
       // Ensure data is an array and has proper structure
       const validatedData = Array.isArray(data) ? data.filter(item => 
         item && 
@@ -55,7 +54,6 @@ export const useMedia = (): UseMediaReturn => {
         caption: item.caption || '',
         uploadedBy: item.uploadedBy || 'user'
       })) : [];
-      console.log('Validated media data:', validatedData);
       setMediaItems(validatedData);
     } catch (err) {
       console.error('Error fetching media:', err);
@@ -70,7 +68,21 @@ export const useMedia = (): UseMediaReturn => {
     try {
       setError(null);
       
+      // Convert file to base64 for serverless function upload
+      const fileBase64 = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+          const result = reader.result as string;
+          // Remove the data URL prefix (data:image/jpeg;base64,)
+          const base64 = result.split(',')[1];
+          resolve(base64);
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+
       const requestBody = {
+        fileData: fileBase64,
         fileName: file.name,
         fileType: file.type,
         uploadedBy: 'user',
