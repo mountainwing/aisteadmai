@@ -1,11 +1,14 @@
 // Vercel serverless function for media API
 import { MongoClient, ObjectId } from 'mongodb';
 import cors from 'cors';
+import { IncomingForm } from 'formidable';
+import { readFileSync } from 'fs';
+import { randomUUID } from 'crypto';
 
 const corsOptions = {
   origin: true,
   credentials: true,
-  methods: ['GET', 'POST', 'DELETE', 'OPTIONS'],
+  methods: ['GET', 'POST', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
 };
 
@@ -53,11 +56,44 @@ export default async function handler(req, res) {
       res.json(media);
       
     } else if (req.method === 'POST') {
-      // For now, return a user-friendly message about file upload limitations on Vercel
-      res.status(400).json({ 
-        error: 'File uploads are temporarily unavailable in the deployed version. This feature works in development mode.',
-        suggestion: 'You can still view and manage existing media items.'
+      // Handle file upload
+      const form = new IncomingForm({
+        maxFileSize: 10 * 1024 * 1024, // 10MB limit
+        uploadDir: '/tmp',
+        keepExtensions: true
       });
+
+      const [fields, files] = await form.parse(req);
+      
+      const file = Array.isArray(files.file) ? files.file[0] : files.file;
+      
+      if (!file) {
+        return res.status(400).json({ error: 'No file uploaded' });
+      }
+
+      // Read file data and convert to base64 for storage
+      const fileBuffer = readFileSync(file.filepath);
+      const fileBase64 = fileBuffer.toString('base64');
+
+      // Create media document
+      const mediaDoc = {
+        _id: new ObjectId(),
+        filename: `${randomUUID()}-${Date.now()}.${file.originalFilename?.split('.').pop() || 'jpg'}`,
+        originalName: file.originalFilename || 'uploaded-file',
+        mimetype: file.mimetype || 'application/octet-stream',
+        size: file.size,
+        type: file.mimetype?.startsWith('video/') ? 'video' : 'image',
+        data: fileBase64, // Store file data as base64
+        uploadedBy: Array.isArray(fields.uploadedBy) ? fields.uploadedBy[0] : fields.uploadedBy || 'user',
+        caption: Array.isArray(fields.caption) ? fields.caption[0] : fields.caption || '',
+        uploadedAt: new Date()
+      };
+
+      const result = await collection.insertOne(mediaDoc);
+      
+      // Return the created media item
+      const createdMedia = await collection.findOne({ _id: result.insertedId });
+      res.json(createdMedia);
       
     } else if (req.method === 'DELETE') {
       const { id } = req.body;
@@ -74,8 +110,32 @@ export default async function handler(req, res) {
       
       res.json({ message: 'Media deleted successfully' });
       
+    } else if (req.method === 'PATCH') {
+      const { id, caption } = req.body;
+      
+      if (!id) {
+        return res.status(400).json({ error: 'ID is required' });
+      }
+      
+      const result = await collection.updateOne(
+        { _id: new ObjectId(id) },
+        { 
+          $set: { 
+            caption: caption || '',
+            updatedAt: new Date()
+          }
+        }
+      );
+      
+      if (result.matchedCount === 0) {
+        return res.status(404).json({ error: 'Media not found' });
+      }
+      
+      const updatedMedia = await collection.findOne({ _id: new ObjectId(id) });
+      res.json(updatedMedia);
+      
     } else {
-      res.setHeader('Allow', ['GET', 'POST', 'DELETE', 'OPTIONS']);
+      res.setHeader('Allow', ['GET', 'POST', 'DELETE', 'PATCH', 'OPTIONS']);
       res.status(405).json({ error: `Method ${req.method} not allowed` });
     }
     
