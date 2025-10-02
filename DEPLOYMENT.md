@@ -89,10 +89,13 @@ This guide will help you deploy your Love Landing Page to Vercel with full-stack
 ### Important Notes
 
 #### File Uploads
-- **Limitation:** Vercel's serverless functions have limited file storage
-- **For production:** Consider using a service like:
+- **Important:** File uploads are currently disabled in the Vercel deployment due to serverless limitations
+- **Workaround:** You can still add media by:
+  1. Manually adding image URLs to your MongoDB `media` collection
+  2. Using external image hosting services (Imgur, Cloudinary, etc.)
+- **For full file upload functionality:** Consider using:
   - Cloudinary (recommended for images/videos)
-  - AWS S3
+  - AWS S3 with signed URLs
   - Google Cloud Storage
 
 #### Database Collections

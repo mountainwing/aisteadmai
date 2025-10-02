@@ -40,29 +40,11 @@ export default async function handler(req, res) {
       res.json(media);
       
     } else if (req.method === 'POST') {
-      const { filename, originalName, mimetype, size, role } = req.body;
-      
-      if (role !== 'boyfriend') {
-        return res.status(403).json({ error: 'Unauthorized: Only boyfriends can upload media' });
-      }
-      
-      if (!filename || !originalName || !mimetype) {
-        return res.status(400).json({ error: 'File information is required' });
-      }
-      
-      const newMedia = {
-        filename,
-        originalName,
-        mimetype,
-        size: size || 0,
-        uploadedAt: new Date(),
-        url: `/uploads/${filename}`
-      };
-      
-      const result = await collection.insertOne(newMedia);
-      const insertedMedia = await collection.findOne({ _id: result.insertedId });
-      
-      res.status(201).json(insertedMedia);
+      // For now, return a message about file upload limitations on Vercel
+      res.status(501).json({ 
+        error: 'File uploads not implemented for Vercel deployment. Consider using Cloudinary or AWS S3 for media storage.',
+        message: 'Media upload feature requires external storage service in production.'
+      });
       
     } else if (req.method === 'DELETE') {
       const { id, role } = req.body;

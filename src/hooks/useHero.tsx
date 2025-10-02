@@ -18,7 +18,7 @@ interface UseHeroReturn {
   refreshHero: () => Promise<void>;
 }
 
-const API_BASE_URL = 'http://localhost:3001/api';
+const API_BASE_URL = process.env.NODE_ENV === 'production' ? '/api' : 'http://localhost:3001/api';
 
 export const useHero = (): UseHeroReturn => {
   const [heroData, setHeroData] = useState<HeroData | null>(null);

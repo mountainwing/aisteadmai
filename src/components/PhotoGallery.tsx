@@ -200,14 +200,14 @@ const PhotoGallery = ({ isEditMode = false }: PhotoGalleryProps) => {
                     <div className="h-4/5 relative overflow-hidden">
                       {item.type === 'image' ? (
                         <img 
-                          src={`http://localhost:3001${item.url}`}
+                          src={`${process.env.NODE_ENV === 'production' ? '' : 'http://localhost:3001'}${item.url}`}
                           alt={item.caption || "Memory"} 
                           className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
                         />
                       ) : (
                         <div className="relative w-full h-full">
                           <video 
-                            src={`http://localhost:3001${item.url}`}
+                            src={`${process.env.NODE_ENV === 'production' ? '' : 'http://localhost:3001'}${item.url}`}
                             className="w-full h-full object-cover"
                             controls
                             preload="metadata"
