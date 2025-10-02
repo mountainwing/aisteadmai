@@ -104,8 +104,8 @@ Your app uses these MongoDB collections:
 
 #### Login Credentials
 Currently hardcoded in the app:
-- **Boyfriend:** username: `ethan`, password: `iloveyou`
-- **Girlfriend:** username: `girlfriend`, password: `password123`
+- **Boyfriend:** username: `boyboy`, password: `ethanethan`
+- **Girlfriend:** username: `girlgirl`, password: `cherylcheryl`
 
 **For production, consider:**
 - Using environment variables for credentials

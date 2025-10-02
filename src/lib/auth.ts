@@ -18,6 +18,6 @@ export const authContext = createContext<AuthContextType | undefined>(undefined)
 
 // Hardcoded credentials for the two users
 export const USERS = {
-  boyfriend: { username: 'boyfriend', password: 'mylovesecret', role: 'boyfriend' as UserRole },
-  girlfriend: { username: 'girlfriend', password: 'ourlovesecret', role: 'girlfriend' as UserRole },
+  boyfriend: { username: 'boyboy', password: 'ethanethan', role: 'boyfriend' as UserRole },
+  girlfriend: { username: 'girlgirl', password: 'cherylcheryl', role: 'girlfriend' as UserRole },
 };
