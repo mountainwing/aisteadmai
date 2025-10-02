@@ -4,7 +4,11 @@ import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
 import confetti from "canvas-confetti";
 
-const ProposalSection = () => {
+interface ProposalSectionProps {
+  isEditMode?: boolean;
+}
+
+const ProposalSection = ({ isEditMode = false }: ProposalSectionProps) => {
   const [answered, setAnswered] = useState(false);
 
   const handleYes = () => {
