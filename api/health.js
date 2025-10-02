@@ -9,6 +9,14 @@ export default async function handler(req, res) {
     status: 'OK', 
     timestamp: new Date().toISOString(),
     service: 'Love Landing API',
-    environment: 'production'
+    environment: process.env.NODE_ENV || 'production',
+    azure: {
+      configured: !!process.env.AZURE_STORAGE_CONNECTION_STRING,
+      container: process.env.AZURE_STORAGE_CONTAINER_NAME || 'love-ly-media'
+    },
+    mongodb: {
+      configured: !!process.env.MONGODB_URI,
+      database: process.env.MONGODB_DB_NAME || '_ethan_boyfriend_proposal'
+    }
   });
 }
