@@ -53,11 +53,7 @@ export default async function handler(req, res) {
       res.json(reasons);
       
     } else if (req.method === 'POST') {
-      const { title, description, role } = req.body;
-      
-      if (role !== 'boyfriend') {
-        return res.status(403).json({ error: 'Unauthorized: Only boyfriends can add reasons' });
-      }
+      const { title, description } = req.body;
       
       if (!title || !description) {
         return res.status(400).json({ error: 'Title and description are required' });
@@ -80,11 +76,7 @@ export default async function handler(req, res) {
       res.status(201).json(insertedReason);
       
     } else if (req.method === 'PUT') {
-      const { id, title, description, role } = req.body;
-      
-      if (role !== 'boyfriend') {
-        return res.status(403).json({ error: 'Unauthorized: Only boyfriends can edit reasons' });
-      }
+      const { id, title, description } = req.body;
       
       if (!id || !title || !description) {
         return res.status(400).json({ error: 'ID, title and description are required' });
@@ -109,11 +101,7 @@ export default async function handler(req, res) {
       res.json(updatedReason);
       
     } else if (req.method === 'DELETE') {
-      const { id, role } = req.body;
-      
-      if (role !== 'boyfriend') {
-        return res.status(403).json({ error: 'Unauthorized: Only boyfriends can delete reasons' });
-      }
+      const { id } = req.body;
       
       if (!id) {
         return res.status(400).json({ error: 'ID is required' });

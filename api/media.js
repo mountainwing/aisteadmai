@@ -60,11 +60,7 @@ export default async function handler(req, res) {
       });
       
     } else if (req.method === 'DELETE') {
-      const { id, role } = req.body;
-      
-      if (role !== 'boyfriend') {
-        return res.status(403).json({ error: 'Unauthorized: Only boyfriends can delete media' });
-      }
+      const { id } = req.body;
       
       if (!id) {
         return res.status(400).json({ error: 'ID is required' });

@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { useAuth } from './useAuth';
 
 interface HeroData {
   _id?: string;
@@ -24,7 +23,6 @@ export const useHero = (): UseHeroReturn => {
   const [heroData, setHeroData] = useState<HeroData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { user } = useAuth();
 
   const fetchHeroData = async () => {
     try {
@@ -56,12 +54,6 @@ export const useHero = (): UseHeroReturn => {
   };
 
   const updateHero = async (updateData: Partial<Pick<HeroData, 'title' | 'description' | 'backgroundImage'>>): Promise<boolean> => {
-    // Only allow updates if user is boyfriend
-    if (!user || user.role !== 'boyfriend') {
-      setError('Only the boyfriend can edit hero data');
-      return false;
-    }
-
     try {
       setError(null);
       

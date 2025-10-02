@@ -6,6 +6,7 @@ import heroRoutes from './routes/hero.js';
 import mediaRoutes from './routes/media.js';
 import reasonsRoutes from './routes/reasons.js';
 import reasonHeaderRoutes from './routes/reasonheader.js';
+import proposalRoutes from './routes/proposal.js';
 
 // Load environment variables from root directory
 dotenv.config({ path: path.resolve(process.cwd(), '.env') });
@@ -29,6 +30,7 @@ app.use('/api/hero', heroRoutes);
 app.use('/api/media', mediaRoutes);
 app.use('/api/reasons', reasonsRoutes);
 app.use('/api/reasonheader', reasonHeaderRoutes);
+app.use('/api/proposal', proposalRoutes);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {

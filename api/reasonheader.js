@@ -61,11 +61,7 @@ export default async function handler(req, res) {
       res.json(reasonHeader);
       
     } else if (req.method === 'POST') {
-      const { title, subtitle, role } = req.body;
-      
-      if (role !== 'boyfriend') {
-        return res.status(403).json({ error: 'Unauthorized: Only boyfriends can edit reason header' });
-      }
+      const { title, subtitle } = req.body;
       
       if (!title || !subtitle) {
         return res.status(400).json({ error: 'Title and subtitle are required' });

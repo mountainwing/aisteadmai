@@ -103,6 +103,7 @@ Your app uses these MongoDB collections:
 - `hero` - Main landing page content
 - `reasons` - Love reasons list
 - `reasonheader` - Section header for reasons
+- `proposal` - Proposal section content (title, question, button text, success messages)
 - `media` - Uploaded photos/videos metadata
 
 #### Login Credentials
@@ -133,7 +134,7 @@ Currently hardcoded in the app:
    - **Verify Node.js version**: Make sure your package.json includes `"engines": { "node": ">=18.0.0" }`
    - **Check deployment logs**: Look for build errors in Vercel deployment logs
    - **MongoDB Atlas setup**: Ensure IP whitelist includes `0.0.0.0/0` for all IPs
-   - **Test individual endpoints**: Try `/api/health`, `/api/hero`, `/api/reasons` separately
+   - **Test individual endpoints**: Try `/api/health`, `/api/hero`, `/api/reasons`, `/api/proposal` separately
 
 3. **Build Errors:**
    - Check the build logs in Vercel

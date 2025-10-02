@@ -1,16 +1,14 @@
-// Vercel serverless function for hero API
+// Vercel serverless function for proposal API
 import { MongoClient } from 'mongodb';
 import cors from 'cors';
 
-// CORS configuration
 const corsOptions = {
-  origin: true, // Allow all origins in production, or specify your domain
+  origin: true,
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
 };
 
-// Apply CORS middleware
 function runCors(req, res) {
   return new Promise((resolve, reject) => {
     cors(corsOptions)(req, res, (result) => {
@@ -37,7 +35,6 @@ async function connectDB() {
 }
 
 export default async function handler(req, res) {
-  // Handle CORS
   await runCors(req, res);
   
   if (req.method === 'OPTIONS') {
@@ -48,30 +45,39 @@ export default async function handler(req, res) {
   let db;
   
   try {
-    // Connect to database
     db = await connectDB();
-    const collection = db.collection('hero');
+    const collection = db.collection('proposal');
     
     if (req.method === 'GET') {
-      const hero = await collection.findOne({});
-      if (!hero) {
-        return res.status(404).json({ error: 'Hero content not found' });
+      const proposal = await collection.findOne({});
+      if (!proposal) {
+        // Return default values if no proposal exists
+        return res.json({
+          title: "So, My Love...",
+          question: "Will you make me the happiest person alive and marry me?",
+          buttonText: "Yes! Forever & Always",
+          successTitle: "💍 Forever Starts Now 💍",
+          successMessage: "You've just made all my dreams come true"
+        });
       }
-      res.json(hero);
+      res.json(proposal);
       
     } else if (req.method === 'POST') {
-      const { title, description } = req.body;
+      const { title, question, buttonText, successTitle, successMessage } = req.body;
       
-      if (!title || !description) {
-        return res.status(400).json({ error: 'Title and description are required' });
+      if (!title || !question || !buttonText || !successTitle || !successMessage) {
+        return res.status(400).json({ error: 'All fields are required' });
       }
       
-      const updatedHero = await collection.findOneAndUpdate(
+      const updatedProposal = await collection.findOneAndUpdate(
         {},
         { 
           $set: { 
             title: title.trim(),
-            description: description.trim(),
+            question: question.trim(),
+            buttonText: buttonText.trim(),
+            successTitle: successTitle.trim(),
+            successMessage: successMessage.trim(),
             updatedAt: new Date()
           }
         },
@@ -81,7 +87,7 @@ export default async function handler(req, res) {
         }
       );
       
-      res.json(updatedHero);
+      res.json(updatedProposal);
       
     } else {
       res.setHeader('Allow', ['GET', 'POST', 'OPTIONS']);
@@ -89,7 +95,7 @@ export default async function handler(req, res) {
     }
     
   } catch (error) {
-    console.error('Hero API Error:', error);
+    console.error('Proposal API Error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 }

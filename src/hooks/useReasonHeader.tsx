@@ -11,13 +11,13 @@ const fetchReasonHeader = async () => {
   return response.json();
 };
 
-const updateReasonHeader = async ({ title, subtitle, updatedBy }) => {
+const updateReasonHeader = async ({ title, subtitle }) => {
   const response = await fetch(`${API_BASE_URL}/reasonheader`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ title, subtitle, updatedBy }),
+    body: JSON.stringify({ title, subtitle }),
   });
 
   if (!response.ok) {
