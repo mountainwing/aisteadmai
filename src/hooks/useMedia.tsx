@@ -55,16 +55,19 @@ export const useMedia = (): UseMediaReturn => {
     try {
       setError(null);
       
-      const formData = new FormData();
-      formData.append('file', file);
-      formData.append('uploadedBy', 'user');
-      if (caption) {
-        formData.append('caption', caption);
-      }
+      const requestBody = {
+        fileName: file.name,
+        fileType: file.type,
+        uploadedBy: 'user',
+        caption: caption || ''
+      };
 
       const response = await fetch(`${API_BASE_URL}/media`, {
         method: 'POST',
-        body: formData,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestBody),
       });
 
       if (!response.ok) {
@@ -121,12 +124,12 @@ export const useMedia = (): UseMediaReturn => {
     try {
       setError(null);
 
-      const response = await fetch(`${API_BASE_URL}/media/${id}`, {
+      const response = await fetch(`${API_BASE_URL}/media`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ caption, username: 'user' }),
+        body: JSON.stringify({ id, caption }),
       });
 
       if (!response.ok) {

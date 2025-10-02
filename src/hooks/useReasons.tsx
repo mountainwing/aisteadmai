@@ -11,7 +11,7 @@ const fetchReasons = async () => {
   return response.json();
 };
 
-const createReason = async ({ title, description }) => {
+const createReason = async ({ title, description }: { title: string; description: string }) => {
   const response = await fetch(`${API_BASE_URL}/reasons`, {
     method: 'POST',
     headers: {
@@ -28,7 +28,7 @@ const createReason = async ({ title, description }) => {
   return response.json();
 };
 
-const updateReason = async ({ id, title, description }) => {
+const updateReason = async ({ id, title, description }: { id: string; title: string; description: string }) => {
   const response = await fetch(`${API_BASE_URL}/reasons`, {
     method: 'PUT',
     headers: {
@@ -45,7 +45,7 @@ const updateReason = async ({ id, title, description }) => {
   return response.json();
 };
 
-const deleteReason = async ({ id }) => {
+const deleteReason = async (id: string) => {
   const response = await fetch(`${API_BASE_URL}/reasons`, {
     method: 'DELETE',
     headers: {
@@ -62,13 +62,13 @@ const deleteReason = async ({ id }) => {
   return response.json();
 };
 
-const reorderReasons = async ({ newOrder }) => {
+const reorderReason = async ({ reasonIds }: { reasonIds: string[] }) => {
   const response = await fetch(`${API_BASE_URL}/reasons/reorder`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ newOrder }),
+    body: JSON.stringify({ reasonIds }),
   });
 
   if (!response.ok) {
@@ -127,7 +127,7 @@ export const useReasons = () => {
   });
 
   const reorderReasonMutation = useMutation({
-    mutationFn: reorderReasons,
+    mutationFn: reorderReason,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['reasons'] });
     },
