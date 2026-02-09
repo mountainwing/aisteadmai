@@ -36,7 +36,7 @@ function PhoneCall() {
                         <div className="relative w-32 h-32 rounded-full overflow-hidden border-4 border-pink-500 shadow-2xl bg-gray-700 flex items-center justify-center animate-bounce-slow">
                             {/* Replace the src below with your actual image path from assets */}
                             <img 
-                                src="/src/assets/yuelao.jpg" 
+                                src="/yuelao.jpg" 
                                 alt="月老"
                                 className="w-full h-full object-cover"
                                 onError={(e) => {
@@ -77,7 +77,7 @@ function PhoneCall() {
                         {/* Caller ID Image - larger when connected */}
                         <div className="relative w-40 h-40 rounded-full overflow-hidden border-4 border-green-500 shadow-2xl bg-gray-700 flex items-center justify-center animate-scale-up">
                             <img 
-                                src="/src/assets/yuelao.jpg" 
+                                src="/yuelao.jpg" 
                                 alt="月老"
                                 className="w-full h-full object-cover"
                                 onError={(e) => {

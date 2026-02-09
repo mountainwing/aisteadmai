@@ -31,27 +31,27 @@ function StoryPage() {
 	]
 
 	const storyImages = [
-		"src/assets/yuelao.jpg", // No image for first slide
-		"src/assets/pretty.jpg", // Add image URL here if you want
-		"src/assets/smallsize.jpg", // Add image URL here if you want
-		"src/assets/yuelao.jpg",  // Add image URL here if you want
-		"src/assets/yuelao.jpg",
-		"src/assets/wingholdbanana.jpg",
-		"src/assets/yuelao.jpg",
-		"src/assets/wingredsinglet.jpg",
-		"src/assets/yuelao.jpg",
-		"src/assets/sentosadate.jpg",
-		"src/assets/bardate.jpg",
-		"src/assets/gentingdate.jpg",
-		"src/assets/xmaswonderland.jpg",
-		"src/assets/dogcafedate.jpg",
-		"src/assets/yuelao.jpg",
-		"src/assets/ehem.jpg",
-		"src/assets/heart.jpg",
-		"src/assets/3.jpg",
-		"src/assets/4.jpg",
-		"src/assets/5.jpg",
-		"src/assets/6.jpg",
+		"/yuelao.jpg", // No image for first slide
+		"/pretty.jpg", // Add image URL here if you want
+		"/smallsize.jpg", // Add image URL here if you want
+		"/yuelao.jpg",  // Add image URL here if you want
+		"/yuelao.jpg",
+		"/wingholdbanana.jpg",
+		"/yuelao.jpg",
+		"/wingredsinglet.jpg",
+		"/yuelao.jpg",
+		"/sentosadate.jpg",
+		"/bardate.jpg",
+		"/gentingdate.jpg",
+		"/xmaswonderland.jpg",
+		"/dogcafedate.jpg",
+		"/yuelao.jpg",
+		"/ehem.jpg",
+		"/heart.jpg",
+		"/3.jpg",
+		"/4.jpg",
+		"/5.jpg",
+		"/6.jpg",
 	]
 
 	const handlesNextClick = () => {
